@@ -54,8 +54,18 @@ def create_csr(): # ugh! - would like to avoid this but will require a custom re
     response = client.create_keys_and_certificate(
         setAsActive=True
     )
-
     # save device certificates
     # write to file and upload to s3 for retrieval
-
+    print(response)
     return response['certificateArn']
+
+
+def read_csr():
+  with open('./CA/verificationCert.csr', 'r') as f:
+    csr_file = f.read()
+    print(csr_file)
+  return csr_file
+
+# smoke test
+#create_csr()
+#read_csr()

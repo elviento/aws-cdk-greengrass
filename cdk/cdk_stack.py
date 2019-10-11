@@ -39,47 +39,40 @@ class CdkStack(core.Stack):
             #role_arn='myggg-role'  # optional
         )
 
-        # gg_device_def = gg.CfnDeviceDefinition(self,
-        #     'MyGGGCDKDeviceDefinition',
-        #     name='myggg-device-definition'
-        # )
-
-
-
-
-        '''TODO'''
-        # add gg_core to core definition (check in console)
-        # add core definition to group ""
-        # try aws cli to understand logical order of core definition
-
         # create iot thing certificate
-        certArn = boto3_helper.create_csr()  # ugh! - gens a new cert for each deployment
+        #certArn = boto3_helper.create_csr()  # ugh! - gens a new cert for each deployment
+        cacert_csr=boto3_helper.read_csr()
+        iot_cacert = iot.CfnCertificate(self,
+            'MyGGGCDKCACertificate',
+            certificate_signing_request=cacert_csr,
+            status="ACTIVE"
+        )
+        print('## Show me Cert ARN: %s' % iot_cacert.attr_arn)
+
         thing_policy_principal_props = iot.CfnPolicyPrincipalAttachmentProps(
             policy_name=thing_policy.policy_name,
-            principal=certArn
+            principal=iot_cacert.attr_arn
         )
         print('## Principal Cert Arn: %s' % thing_policy_principal_props.principal)
 
+        # gg_core_def = gg.CfnCoreDefinition(self,
+        #     'MyGGGCDKCoreDefinition',
+        #     name='myggg-core-definition',
+        #     initial_version=1
+        # )
 
-        gg_core_def = gg.CfnCoreDefinition(self,
-            'MyGGGCDKCoreDefinition',
-            name='myggg-core-definition',
-            initial_version=1
-        )
-
-        gg_core_def_version = gg.CfnCoreDefinitionVersion(self,
-            'MyGGCDKCoreDefinitionVersion',
-            core_definition_id=gg_core_def.logical_id,
-            cores=[
-                {
-                    "id": "blah",
-                    "thingArn": gg_core.get_att.thingArn,
-                    "certificateArn": "blah",
-                    "syncShadow": True
-                }
-            ]
-        )
-
+        # gg_core_def_version = gg.CfnCoreDefinitionVersion(self,
+        #     'MyGGCDKCoreDefinitionVersion',
+        #     core_definition_id=gg_core_def.logical_id,
+        #     cores=[
+        #         {
+        #             "id": "blah",
+        #             "thingArn": gg_core.get_att.thingArn,
+        #             "certificateArn": "blah",
+        #             "syncShadow": True
+        #         }
+        #     ]
+        # )
 
         # attach policy to iot certificate
         iot.CfnPolicyPrincipalAttachment(self,
