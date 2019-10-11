@@ -49,8 +49,13 @@ policyDocument = {
 }
 
 
+# create csr for device certificates
 def create_csr(): # ugh! - would like to avoid this but will require a custom resource
     response = client.create_keys_and_certificate(
         setAsActive=True
     )
+
+    # save device certificates
+    # write to file and upload to s3 for retrieval
+
     return response['certificateArn']

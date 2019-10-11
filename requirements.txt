@@ -1,4 +1,5 @@
 -e .
 aws-cdk.aws-iot
+aws-cdk.aws-greengrass
 boto3
 botostubs
