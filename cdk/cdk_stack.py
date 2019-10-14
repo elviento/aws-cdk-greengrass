@@ -40,7 +40,10 @@ class CdkStack(core.Stack):
         )
 
         # create iot thing certificate
+        # uncomment boto3_helper.create_csr() if you want to use AWS keys and certs
         #certArn = boto3_helper.create_csr()  # ugh! - gens a new cert for each deployment
+       
+        # using a self-signed cacert csr
         cacert_csr=boto3_helper.read_csr()
         iot_cacert = iot.CfnCertificate(self,
             'MyGGGCDKCACertificate',
@@ -49,30 +52,24 @@ class CdkStack(core.Stack):
         )
         print('## Show me Cert ARN: %s' % iot_cacert.attr_arn)
 
+        # attach policy to principal cert
         thing_policy_principal_props = iot.CfnPolicyPrincipalAttachmentProps(
             policy_name=thing_policy.policy_name,
             principal=iot_cacert.attr_arn
         )
         print('## Principal Cert Arn: %s' % thing_policy_principal_props.principal)
 
-        # gg_core_def = gg.CfnCoreDefinition(self,
-        #     'MyGGGCDKCoreDefinition',
-        #     name='myggg-core-definition',
-        #     initial_version=1
-        # )
+        # core definition
+        gg_core_def = gg.CfnCoreDefinition(self,
+            'MyGGGCDKCoreDefinition',
+            name='myggg-core-definition'
+        )
 
-        # gg_core_def_version = gg.CfnCoreDefinitionVersion(self,
-        #     'MyGGCDKCoreDefinitionVersion',
-        #     core_definition_id=gg_core_def.logical_id,
-        #     cores=[
-        #         {
-        #             "id": "blah",
-        #             "thingArn": gg_core.get_att.thingArn,
-        #             "certificateArn": "blah",
-        #             "syncShadow": True
-        #         }
-        #     ]
-        # )
+        gg_core_def_version = gg.CfnCoreDefinitionVersion(self,
+            'MyGGCDKCoreDefinitionVersion',
+            core_definition_id=gg_core_def.attr_id,
+            cores=[]
+        )
 
         # attach policy to iot certificate
         iot.CfnPolicyPrincipalAttachment(self,
